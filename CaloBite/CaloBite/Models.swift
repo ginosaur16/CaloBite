@@ -50,6 +50,13 @@ enum WeightGoal: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Daily Calorie Output Helper Model (Globally Shared)
+struct DailyCalorieSummary: Identifiable {
+    let id = UUID()
+    let date: Date
+    let calories: Double
+}
+
 // MARK: - UserProfile Model
 @Model
 final class UserProfile {
@@ -120,9 +127,6 @@ final class UserProfile {
     
     // Basal Metabolic Rate (BMR) calculation using Mifflin-St Jeor Equation
     var bmr: Double {
-        // Mifflin-St Jeor Equation:
-        // For Men: (10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) + 5
-        // For Women: (10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) - 161
         switch gender {
         case .male:
             return (10 * currentWeightKg) + (6.25 * heightCm) - (5 * Double(age)) + 5
@@ -144,22 +148,18 @@ final class UserProfile {
     // MARK: - Default Macro Calculations (based on common guidelines)
     // These functions can be used to set initial macro goals
     static func dailyCarbByCalories(calories: Double) -> Double {
-        // ~45-65% of calories from carbs, 4 kcal/g
         return (calories * 0.55) / 4.0 // 55% as a moderate default
     }
     
     static func dailyProteinByWeight(weightKg: Double, goal: WeightGoal) -> Double {
-        // Range: 1.6g to 2.2g per kg of body weight for active individuals, higher for muscle gain
-        // Let's use a moderate to high range based on goal
         switch goal {
-        case .lose: return weightKg * 2.0 // Higher protein for satiety and muscle retention
+        case .lose: return weightKg * 2.0 // Higher protein for muscle retention
         case .maintain: return weightKg * 1.8
         case .gain: return weightKg * 2.2 // Higher protein for muscle synthesis
         }
     }
     
     static func dailyFatByCalories(calories: Double) -> Double {
-        // ~20-35% of calories from fat, 9 kcal/g
         return (calories * 0.28) / 9.0 // 28% as a moderate default
     }
 }

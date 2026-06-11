@@ -182,6 +182,22 @@ final class CaloBiteViewModel {
         }
     }
     
+    // MARK: - Delete Tracked Food Feature
+    @MainActor
+    func deleteLog(_ entry: LogEntry) {
+        modelContext.delete(entry)
+        
+        do {
+            try modelContext.save()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                dailyLogs.removeAll { $0.id == entry.id }
+                updateXPState()
+            }
+        } catch {
+            print("Failed to delete log entry: \(error.localizedDescription)")
+        }
+    }
+    
     @MainActor
     func deleteLog(at offsets: IndexSet) {
         for index in offsets {
